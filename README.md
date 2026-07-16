@@ -90,9 +90,3 @@ Resource Terraform:
 1. [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc).
 1. [Subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet).
 1. [Internet Gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway).
-
-### Правила приёма работы
-
-Домашняя работа оформляется в своём Git репозитории в файле README.md. Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
-Файл README.md должен содержать скриншоты вывода необходимых команд, а также скриншоты результатов.
-Репозиторий должен содержать тексты манифестов или ссылки на них в файле README.md.
