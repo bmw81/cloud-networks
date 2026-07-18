@@ -86,3 +86,34 @@ resource "yandex_vpc_security_group" "LAN" {
   }
 
 }
+
+# Security Group для сети public
+
+# Управление группой безопасности по умолчанию для сети develop
+# resource "yandex_vpc_default_security_group" "default" {
+#   network_id = yandex_vpc_network.develop.id
+
+#   # Правила для входящего трафика
+#   ingress {
+#     description    = "Allow SSH"
+#     protocol       = "TCP"
+#     v4_cidr_blocks = ["0.0.0.0/0"]
+#     port           = 22
+#   }
+
+#   ingress {
+#     description    = "Allow HTTP"
+#     protocol       = "TCP"
+#     v4_cidr_blocks = ["0.0.0.0/0"]
+#     port           = 80
+#   }
+
+#   # Правила для исходящего трафика (по умолчанию разрешен весь)
+#   egress {
+#     description    = "Allow ANY"
+#     protocol       = "ANY"
+#     v4_cidr_blocks = ["0.0.0.0/0"]
+#     from_port      = 0
+#     to_port        = 65535
+#   }
+# }
