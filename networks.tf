@@ -46,10 +46,21 @@ resource "yandex_compute_instance" "nat-instance" {
     subnet_id          = yandex_vpc_subnet.public.id
     nat                = true
     ip_address         = "192.168.10.254"
+    security_group_ids = [yandex_vpc_security_group.nat_sg.id]
   }
 
   metadata = {
     ssh-keys = "ubuntu:${file("~/.ssh/tf_ed25519.pub")}"
+    user-data = <<-EOF
+      #cloud-config
+      runcmd:
+        - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+        - sysctl -p
+        - iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+        - apt-get update
+        - apt-get install -y iptables-persistent
+        - netfilter-persistent save
+      EOF
   }
 }
 
@@ -70,13 +81,22 @@ resource "yandex_vpc_route_table" "rt" {
 resource "yandex_vpc_security_group" "LAN" {
   name       = "lan-sg"
   network_id = yandex_vpc_network.develop.id
+
   ingress {
-    description    = "Allow 192.168.10.0/24"
+    description    = "Allow all internal traffic"
     protocol       = "ANY"
-    v4_cidr_blocks = ["192.168.10.0/24"]
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
     from_port      = 0
     to_port        = 65535
   }
+
+  ingress {
+    description    = "Allow SSH from public subnet"
+    protocol       = "TCP"
+    v4_cidr_blocks = ["192.168.10.0/24"]
+    port           = 22
+  }
+
   egress {
     description    = "Allow ANY"
     protocol       = "ANY"
@@ -90,30 +110,53 @@ resource "yandex_vpc_security_group" "LAN" {
 # Security Group для сети public
 
 # Управление группой безопасности по умолчанию для сети develop
-# resource "yandex_vpc_default_security_group" "default" {
-#   network_id = yandex_vpc_network.develop.id
+resource "yandex_vpc_default_security_group" "default" {
+  network_id = yandex_vpc_network.develop.id
 
-#   # Правила для входящего трафика
-#   ingress {
-#     description    = "Allow SSH"
-#     protocol       = "TCP"
-#     v4_cidr_blocks = ["0.0.0.0/0"]
-#     port           = 22
-#   }
+  # Правила для входящего трафика
+  ingress {
+    description    = "Allow SSH"
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 22
+  }
 
-#   ingress {
-#     description    = "Allow HTTP"
-#     protocol       = "TCP"
-#     v4_cidr_blocks = ["0.0.0.0/0"]
-#     port           = 80
-#   }
+  ingress {
+    description    = "Allow HTTP"
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 80
+  }
 
-#   # Правила для исходящего трафика (по умолчанию разрешен весь)
-#   egress {
-#     description    = "Allow ANY"
-#     protocol       = "ANY"
-#     v4_cidr_blocks = ["0.0.0.0/0"]
-#     from_port      = 0
-#     to_port        = 65535
-#   }
-# }
+  # Правила для исходящего трафика (по умолчанию разрешен весь)
+  egress {
+    description    = "Allow ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    from_port      = 0
+    to_port        = 65535
+  }
+}
+
+# Security Group для NAT
+
+resource "yandex_vpc_security_group" "nat_sg" {
+  name       = "nat-sg"
+  network_id = yandex_vpc_network.develop.id
+  
+  ingress {
+    description    = "Allow all internal traffic"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24"]
+    from_port      = 0
+    to_port        = 65535
+  }
+
+  egress {
+    description    = "Allow ANY"
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    from_port      = 0
+    to_port        = 65535
+  }
+}
