@@ -14,6 +14,17 @@ resource "yandex_storage_bucket" "bmw17072026" {
   versioning {
     enabled = false
   }
+
+  # --- Добавлен блок для шифрования ---
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = yandex_kms_symmetric_key.key-1784609715047.id
+        sse_algorithm     = "aws:kms" # Поддерживается только это значение [citation:1]
+      }
+    }
+  }
+  # ------------------------------------
 }
 
 # Загрузить картинку в bucket
@@ -24,4 +35,3 @@ resource "yandex_storage_object" "image" {
   source       = "./Get_money.jpg"
   content_type = "image/jpg"
 }
-
