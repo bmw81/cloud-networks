@@ -1,11 +1,29 @@
-# Local .terraform directories and files
-**/.terraform/*
-.terraform*
-
-!.terraformrc
-
-# .tfstate files
+# Terraform
+.terraform/
 *.tfstate
 *.tfstate.*
-
+.terraform.lock.hcl
 terraform.tfvars
+terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Kubeconfig
+kubeconfig
+kubeconfig.*
+
+# Secrets
+*.pem
+*.key
+*.crt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

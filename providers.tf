@@ -3,13 +3,17 @@ terraform {
     yandex = {
       source = "yandex-cloud/yandex"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
   required_version = ">= 0.13"
 }
 
 provider "yandex" {
-  cloud_id = "b1g42vvurfj7l2uclca3"
-  folder_id = "b1grbnd43egs57caqic6"
+  cloud_id  = var.cloud_id
+  folder_id = var.folder_id
   service_account_key_file = file("~/.authorized_key.json")
-  zone = "ru-central1-a"
+  zone      = var.default_zone
 }
